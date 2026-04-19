@@ -1,4 +1,4 @@
-package com.reservas.medicas;
+package citas.medicas;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
