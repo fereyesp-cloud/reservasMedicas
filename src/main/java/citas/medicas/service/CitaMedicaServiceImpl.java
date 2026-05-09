@@ -2,14 +2,13 @@ package citas.medicas.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import citas.medicas.DTO.ActualizarCitaDTO;
 import citas.medicas.DTO.CitaMedicaRequestDTO;
 import citas.medicas.DTO.CitaMedicaResponseDTO;
+import citas.medicas.exception.CitaNotFoundException;
 import citas.medicas.model.CitaMedica;
 import citas.medicas.model.EstadoCita;
 import citas.medicas.repository.CitaMedicaRepository;
@@ -20,8 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class CitaMedicaServiceImpl implements CitaMedicaService {
 
-    @Autowired
-    private CitaMedicaRepository citaMedicaRepository;
+    // ✅ CORRECCIÓN 1: Inyección por constructor en vez de @Autowired
+    private final CitaMedicaRepository citaMedicaRepository;
+
+    public CitaMedicaServiceImpl(CitaMedicaRepository citaMedicaRepository) {
+        this.citaMedicaRepository = citaMedicaRepository;
+    }
 
     @Override
     public CitaMedicaResponseDTO createCitaMedica(CitaMedicaRequestDTO requestDTO) {
@@ -42,10 +45,11 @@ public class CitaMedicaServiceImpl implements CitaMedicaService {
     public CitaMedicaResponseDTO updateCitaMedica(Long id, ActualizarCitaDTO actualizarCitaDTO) {
         log.info("Actualizando cita médica con ID: {}", id);
 
+        // ✅ CORRECCIÓN 2: Excepción personalizada en vez de RuntimeException
         CitaMedica citaMedica = citaMedicaRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Cita médica no encontrada con ID: {}", id);
-                    return new RuntimeException("Cita no encontrada con ID: " + id);
+                    return new CitaNotFoundException("Cita no encontrada con ID: " + id);
                 });
 
         citaMedica.setEstado(actualizarCitaDTO.getEstado());
@@ -65,9 +69,10 @@ public class CitaMedicaServiceImpl implements CitaMedicaService {
         List<CitaMedica> citas = citaMedicaRepository.findAll();
         log.debug("Total citas encontradas: {}", citas.size());
 
+        // ✅ CORRECCIÓN 3: .toList() en vez de .collect(Collectors.toList())
         return citas.stream()
                 .map(this::convertirAResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -78,9 +83,11 @@ public class CitaMedicaServiceImpl implements CitaMedicaService {
                 .findByEstadoAndFechaCitaBetween(EstadoCita.DISPONIBLE, inicio, fin);
 
         log.debug("Horarios disponibles encontrados: {}", disponibles.size());
+
+        // ✅ CORRECCIÓN 3: .toList() en vez de .collect(Collectors.toList())
         return disponibles.stream()
                 .map(this::convertirAResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -90,7 +97,7 @@ public class CitaMedicaServiceImpl implements CitaMedicaService {
         CitaMedica citaMedica = citaMedicaRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("No se pudo cancelar. Cita no encontrada con ID: {}", id);
-                    return new RuntimeException("Cita no encontrada con ID: " + id);
+                    return new CitaNotFoundException("Cita no encontrada con ID: " + id);
                 });
 
         citaMedica.setEstado(EstadoCita.CANCELADA);

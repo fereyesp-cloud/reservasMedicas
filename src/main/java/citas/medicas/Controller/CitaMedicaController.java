@@ -2,8 +2,8 @@ package citas.medicas.Controller;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +20,11 @@ import citas.medicas.service.CitaMedicaService;
 @CrossOrigin(origins = "*")
 public class CitaMedicaController {
 
-    @Autowired
-    private CitaMedicaService citaMedicaService;
+    private final CitaMedicaService citaMedicaService;
+
+    public CitaMedicaController(CitaMedicaService citaMedicaService) {
+        this.citaMedicaService = citaMedicaService;
+    }
 
     // GET - Listar todas las citas
     @GetMapping
@@ -54,10 +57,10 @@ public class CitaMedicaController {
         return ResponseEntity.ok(response);
     }
 
-    // DELETE - Cancelar una cita
+   
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> cancelarCita(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> cancelarCita(@PathVariable Long id) {
         citaMedicaService.cancelarCita(id);
-        return ResponseEntity.ok("Cita cancelada correctamente");
+        return ResponseEntity.ok(Map.of("mensaje", "Cita cancelada correctamente"));
     }
 }

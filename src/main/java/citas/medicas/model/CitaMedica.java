@@ -11,7 +11,8 @@ import lombok.Data;
 public class CitaMedica {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_citas")
+    @SequenceGenerator(name = "seq_citas", sequenceName = "SEQ_CITAS", allocationSize = 1)
     private Long id;
 
     @Column(name = "fecha_cita", nullable = false)
